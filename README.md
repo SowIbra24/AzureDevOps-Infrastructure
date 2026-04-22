@@ -1,0 +1,46 @@
+# Projet Infrastructure as Code & CI/CD sur Azure
+
+## Présentation du Projet
+Ce projet a pour objectif de mettre en pratique les concepts fondamentaux de la culture **DevOps** et de l'**Infrastructure as Code (IaC)**. 
+
+L'enjeu est de démontrer la capacité à automatiser entièrement le cycle de vie d'une infrastructure cloud : du provisioning des ressources sur **Microsoft Azure** jusqu'à leur configuration logicielle, le tout piloté par un pipeline **CI/CD Azure** industriel.
+
+---
+## Stack Technique
+* **Cloud Provider :** Microsoft Azure
+* **Gestionnaire de version :** GitHub
+* **Orchestrateur CI/CD :** Azure DevOps
+* **Provisioning :** Terraform (Approche modulaire)
+* **Configuration Management :** Ansible (Roles & Collections)
+
+---
+## Configuration de l'environnement (Préliminaires)
+
+Avant de débuter l'écriture du code, une phase de préparation de l'environnement Azure et de la plateforme DevOps a été réalisée :
+
+### 1. Sécurisation des accès (Azure Entra ID)
+* Création d'une **App Registration** (`AzureDevOps-Config-Bot`) agissant comme un Service Principal.
+* Assignation du rôle **Contributeur** sur l'abonnement Azure pour permettre l'automatisation des ressources.
+* Génération d'un **Client Secret** sécurisé pour l'authentification.
+
+### 2. Connectivité Azure DevOps
+* Mise en place d'une **Service Connection** manuelle dans Azure DevOps.
+* Cette connexion permet de faire le pont entre le pipeline de déploiement et l'abonnement Azure sans jamais exposer de secrets dans le code source public sur GitHub.
+
+---
+## Organisation du Dépôt
+Le projet est structuré de manière à séparer les responsabilités :
+
+```text
+.
+├── terraform/                # Infrastructure as Code
+│   ├── modules/              # Composants réutilisables (Network, VM)
+│   ├── main.tf               # Déclaration des ressources/modules
+│   ├── variables.tf          # Définition des variables d'entrée
+│   └── outputs.tf            # Informations de sortie (IPs)
+├── ansible/                  # Configuration Management
+│   ├── roles/                # Unités de configuration (Common, Web, App)
+│   ├── group_vars/           # Variables de configuration par groupes
+│   └── site.yml              # Playbook principal
+└── azure-pipelines.yml       # Définition du pipeline de déploiement
+```
