@@ -44,3 +44,46 @@ Le projet est structuré de manière à séparer les responsabilités :
 │   └── site.yml              # Playbook principal
 └── azure-pipelines.yml       # Définition du pipeline de déploiement
 ```
+
+## Tag v1.0.0 : Mise en place de l'architecture réseau
+
+Cette première étape a consisté à poser les fondations réseau de l'infrastructure sur Azure de manière modulaire :
+* **Resource Group** : Création d'un conteneur logique pour isoler et gérer le cycle de vie des ressources.
+* **Virtual Network (VNet)** : Mise en place de l'espace d'adressage global (10.0.0.0/16).
+* **Subnet** : Segmentation réseau (10.0.1.0/24) pour accueillir les futures machines virtuelles.
+
+---
+
+### 🚀 Exécution du projet
+
+#### Pré-requis
+1. Disposer de **Azure CLI** et **Terraform** sur votre machine.
+2. Une paire de clés SSH (`~/.ssh/id_rsa.pub`) pour l'accès aux futures VMs.
+
+#### Procédure de lancement
+Suivez ces étapes pour déployer l'infrastructure :
+
+ ```bash
+# 1. Authentification Azure:
+    az login
+
+# 2. Configuration de l'abonnement :
+# Exportez votre ID de souscription pour orienter le déploiement :
+    export ARM_SUBSCRIPTION_ID="votre_id_subscription_ici"
+
+# 3. Déploiement avec Terraform :
+# Récupération du dépôt
+    git clone <url_de_votre_depot>
+    cd terraform
+
+# Initialisation (chargement des providers et modules)
+    terraform init
+
+# Visualisation du plan d'exécution
+    terraform plan
+
+# Application et création des ressources
+    terraform apply 
+```
+#### Vérification 
+ Une fois terminé, connectez-vous au portail Azure pour visualiser le groupe de ressources et la topologie réseau créée. Les outputs Terraform afficheront également les IDs des ressources générées.
