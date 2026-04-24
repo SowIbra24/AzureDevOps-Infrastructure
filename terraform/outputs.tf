@@ -21,3 +21,13 @@ output "adresse_ip_vm" {
   description = "L'adresse IP publique pour se connecter à la VM"
   value       = module.ma_vm[*].vm_public_ip
 }
+
+resource "local_file" "inventory" {
+  filename = "../ansible/inventory.ini"
+  content  = <<EOF
+[all]
+%{ for i, ip in module.ma_vm[*].vm_public_ip ~}
+vm-${i} ansible_host=${ip} ansible_user=adminuser
+%{ endfor ~}
+EOF
+}
