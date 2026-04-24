@@ -14,10 +14,11 @@ module "reseau_principal" {
 
 module "ma_vm" {
   source       = "./modules/compute"
+  count = 2
 
   nom_du_rg    = azurerm_resource_group.rg_projet.name      
   emplacement  = azurerm_resource_group.rg_projet.location 
-  nom_projet   = var.nom_projet                               
+  nom_projet   = "${var.nom_projet}-${count.index}"                              
   vm_size      = "Standard_D2s_v3" 
   subnet_id    = module.reseau_principal.subnet_id 
 }

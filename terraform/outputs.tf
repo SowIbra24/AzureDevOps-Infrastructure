@@ -19,5 +19,5 @@ output "final_resource_group_name" {
 
 output "adresse_ip_vm" {
   description = "L'adresse IP publique pour se connecter à la VM"
-  value       = module.ma_vm.vm_public_ip
+  value       = module.ma_vm[*].vm_public_ip
 }
