@@ -16,3 +16,8 @@ output "vnet_name" {
 output "final_resource_group_name" {
   value = azurerm_resource_group.rg_projet.name
 }
+
+output "adresse_ip_vm" {
+  description = "L'adresse IP publique pour se connecter à la VM"
+  value       = module.ma_vm.vm_public_ip
+}
