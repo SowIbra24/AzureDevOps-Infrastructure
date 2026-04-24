@@ -87,3 +87,25 @@ Suivez ces étapes pour déployer l'infrastructure :
 ```
 #### Vérification 
  Une fois terminé, connectez-vous au portail Azure pour visualiser le groupe de ressources et la topologie réseau créée. Les outputs Terraform afficheront également les IDs des ressources générées.
+
+## Retours d'expérience & Troubleshooting
+
+Le déploiementa été ardu. Voici les points de frictions et les solutions appliquées :
+
+* **Quotas Azure (SKU Not Available) :** Échec initial en *West Europe* et *Spain Central* (saturation des ressources pour les comptes Students).
+  * **Solution :** Migration vers **Poland Central** (`polandcentral`) après avoir testé les autres destinations autorisées pour garantir la disponibilité des instances.
+
+* **Désynchronisation du State :** Crash du provider pendant un `apply`, créant des ressources "orphelines" (présentes sur Azure mais absentes du `.tfstate`).
+  * **Solution :** Réconciliation manuelle via `terraform import` pour réaligner le code avec la réalité du Cloud.
+
+* **Isolation Réseau :** VM "Running" mais injoignable (Timeout SSH/Ping) dû au "Deny All" par défaut d'Azure.
+  * **Solution :** Création d'un **Network Security Group (NSG)** lié au Subnet avec des règles explicites pour le port **22 (TCP)** et le protocole **ICMP (Ping)**.
+
+### État Actuel : VM Linux Opérationnelle
+L'infrastructure de base est désormais stable. Une machine virtuelle Linux est déployée, répond au ping et peut être entièrement administrée via SSH.
+
+---
+
+## Prochaines étapes
+1. **Scaling :** Déploiement d'une 2ème VM via le module `compute`.
+2. **Ansible :** Automatisation de la configuration logicielle (Rôles & Collections) sur l'ensemble du parc.
