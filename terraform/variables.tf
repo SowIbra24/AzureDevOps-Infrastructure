@@ -7,7 +7,7 @@ variable "nom_projet" {
 variable "region" {
     description = "La localisation géographique des ressources"
     type = string
-    default = "germanywestcentral"
+    default = "polandcentral"
 }
 
 variable "env" {
