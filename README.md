@@ -54,7 +54,7 @@ Cette première étape a consisté à poser les fondations réseau de l'infrastr
 
 ---
 
-### 🚀 Exécution du projet
+### Exécution du projet
 
 #### Pré-requis
 1. Disposer de **Azure CLI** et **Terraform** sur votre machine.
@@ -68,8 +68,8 @@ Suivez ces étapes pour déployer l'infrastructure :
     az login
 
 # 2. Configuration de l'abonnement :
-# Exportez votre ID de souscription pour orienter le déploiement :
-    export ARM_SUBSCRIPTION_ID="votre_id_subscription_ici"
+# Lancer la variable d'environnement depuis la racine du projet
+    source .env
 
 # 3. Déploiement avec Terraform :
 # Récupération du dépôt
@@ -109,3 +109,76 @@ L'infrastructure de base est désormais stable. Une machine virtuelle Linux est 
 ## Prochaines étapes
 1. **Scaling :** Déploiement d'une 2ème VM via le module `compute`.
 2. **Ansible :** Automatisation de la configuration logicielle (Rôles & Collections) sur l'ensemble du parc.
+
+## Tag v2.1.0 : Configuration Management avec Ansible
+
+Une fois l'infrastructure provisionnée par Terraform, la phase de **Configuration Management** intervient pour transformer des VMs vierges en serveurs fonctionnels. Cette étape est pilotée par Ansible.
+
+### 1. Gestion des accès et sécurité
+Pour garantir une automatisation fluide et sécurisée, l'approche suivante a été adoptée :
+* **Authentification par Clé SSH** : Injection automatique de la clé publique locale via le module `authorized_key`. Cela permet de garantir l'accès même lorsque les politiques par défaut des images Azure restreignent l'usage des mots de passe.
+* **Privilèges Sudo** : Configuration d'un accès `sudo` sans mot de passe pour les utilisateurs personnalisés, permettant à Ansible d'exécuter des tâches d'administration (apt, service) de manière totalement non-interactive.
+
+### 2. Organisation par Rôles
+Le déploiement est segmenté en rôles réutilisables pour respecter le principe **DRY** :
+* **user_management** : Création des comptes utilisateurs, configuration des clés SSH et des droits sudoers.
+* **web_server** : Installation de Nginx et déploiement d'une page d'accueil personnalisée.
+* **admin_tools** : Installation d'outils de diagnostic réseau (nmap, tcpdump, netcat).
+
+### 3. Orchestration Conditionnelle
+Le playbook principal (`site.yml`) utilise des variables d'environnement et des conditions pour assigner des rôles spécifiques selon le nom d'hôte (`inventory_hostname`) :
+* **VM-0** : Déployée comme serveur Web.
+* **VM-1** : Déployée comme bastion d'administration.
+
+---
+
+## Guide d'utilisation Ansible
+
+### Pré-requis locaux
+Avant de lancer la configuration, assurez-vous d'avoir renseigné le fichier de variables d'environnement.
+
+1. **Préparer le fichier .env** :
+   Utilisez le template fourni pour créer votre fichier local (ce fichier est ignoré par Git pour votre sécurité) :
+
+   ```bash
+   cp .env.example .env
+   # Éditez ensuite le fichier .env avec vos propres valeurs : ID abonnement, passwords, etc.
+   ```
+
+2. **Charger les credentials** :
+   Au lieu d'exporter chaque variable manuellement, sourcez le fichier :
+   ```bash
+   source .env
+   ```
+### Exécution du Playbook
+Depuis la racine du projet, lancez le déploiement de la configuration :
+
+```bash
+    cd ansible
+    # Lancement du déploiement
+    ansible-playbook site.yml
+```
+
+---
+
+## État Actuel : Parc VM Multirôle Opérationnel
+L'infrastructure est désormais complète et configurée :
+- **Connectivité** : Toutes les machines sont accessibles via clé SSH.
+- **Services** : Le serveur Web est en ligne et les outils d'administration sont prêts à l'emploi.
+- **Orchestration** : Un seul point d'entrée (site.yml) permet de reconfigurer l'ensemble du parc de manière idempotente.
+
+---
+
+## Prochaines étapes
+
+### 1. Collections & Optimisation
+Migration des tâches vers des collections communautaires pour une meilleure maintenabilité.
+
+### 2. Validation & Tests (Terratest)
+Mise en place de tests unitaires et d'intégration avec **Terratest**. L'objectif est d'écrire des tests en Go pour valider automatiquement que :
+- Les ressources Azure sont réellement créées selon le plan.
+- Les ports (22, 80) sont bien ouverts.
+- Les services (Nginx) répondent correctement après le passage d'Ansible.
+
+### 3. Azure DevOps Pipeline
+Intégration finale de l'exécution Ansible et des tests de validation dans le pipeline CI/CD pour un cycle de déploiement "Zero-Touch" et sécurisé.
