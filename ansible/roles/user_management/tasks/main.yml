@@ -1,0 +1,23 @@
+---
+- name: "Création de l'utilisateur {{ custom_user }}"
+  ansible.builtin.user:
+    name: "{{ custom_user }}"
+    shell: /bin/bash
+    create_home: yes
+    groups: sudo
+    append: yes
+    state: present
+
+- name: "Ajouter la clé SSH publique pour {{ custom_user }}"
+  ansible.posix.authorized_key:
+    user: "{{ custom_user }}"
+    state: present
+    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+    
+- name: "Configuration du Sudo sans mot de passe pour {{ custom_user }}"
+  ansible.builtin.copy:
+    content: "{{ custom_user }} ALL=(ALL) NOPASSWD:ALL"
+    dest: "/etc/sudoers.d/{{ custom_user }}"
+    mode: '0440'
+    validate: '/usr/sbin/visudo -cf %s'
+
