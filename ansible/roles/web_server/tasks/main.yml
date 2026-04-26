@@ -1,0 +1,17 @@
+---
+- name: "Installation de Nginx"
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+
+- name: "Configuration d'une page d'accueil personnalisée"
+  ansible.builtin.copy:
+    content: "<h1>Bienvenue sur la VM-0 d'Ibra !</h1><p>Deployee via Ansible.</p>"
+    dest: "/var/www/html/index.html"
+    mode: '0644'
+
+- name: "S'assurer que Nginx est démarré"
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: yes

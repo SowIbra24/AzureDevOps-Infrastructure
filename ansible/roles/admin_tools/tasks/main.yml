@@ -1,0 +1,8 @@
+---
+- name: "Installation des outils de diagnostic réseau"
+  ansible.builtin.apt:
+    name:
+      - nmap
+      - tcpdump
+      - netcat-openbsd
+    state: present
