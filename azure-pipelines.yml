@@ -1,0 +1,35 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: GoTool@0
+  inputs:
+    version: '1.25.9'
+  displayName: 'Install Go'
+
+- task: TerraformInstaller@1
+  inputs:
+    terraformVersion: 'latest'
+  displayName: 'Install Terraform'
+
+- task: AzureCLI@2
+  displayName: 'Run Terratest (Apply -> Ping -> Destroy)'
+  inputs:
+    azureSubscription: 'AzureDevOps-Connexion'
+    scriptLocation: 'inlineScript'
+    addSpnToEnvironment: true
+    inlineScript: |
+     
+      export ARM_CLIENT_ID=$servicePrincipalId
+      export ARM_CLIENT_SECRET=$servicePrincipalKey
+      export ARM_TENANT_ID=$tenantId
+      export ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+      
+      echo "---------------------- Connexion établie pour le robot : $ARM_CLIENT_ID ------------------------------"
+
+      cd tests
+      go mod tidy
+      go test -v 
